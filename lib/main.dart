@@ -167,7 +167,7 @@ class _StudentFormPageState extends State<StudentFormPage> {
                       borderRadius: BorderRadius.circular(20),
                       child: Image.asset(
                         'assets/mi_imagen.png',
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                   ),
