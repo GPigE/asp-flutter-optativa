@@ -1,44 +1,61 @@
-import 'package:flutter/material.dart';
-import 'package:parcial1/models/producto.dart';
+import '../models/producto.dart';
 
-class Carrito extends StatelessWidget {
+class Carrito {
   const Carrito({
-    super.key,
-    required this.title,
-    required this.clienteNombre,
-    required this.clienteCorreo,
+    required this.id,
+    required this.userId,
     required this.productos,
   });
 
-  final String title;
-  final String clienteNombre;
-  final String clienteCorreo;
-  final List<Producto> productos;
+  final int id;
+  final int userId;
+  final List<ProductoCarrito> productos;
 
-  @override
-  Widget build(BuildContext context) {
-    final total = productos.fold<double>(
-      0,
-      (total, producto) => total + producto.price,
-    );
+  factory Carrito.fromJson(Map<String, dynamic> json) => Carrito(
+    id: json['id'] as int,
+    userId: json['userId'] as int,
+    productos: (json['products'] as List)
+        .map((item) => ProductoCarrito.fromJson(item as Map<String, dynamic>))
+        .toList(),
+  );
+}
 
-    return Row(
-      children: [
-        Image.asset('lib/src/carritocomprasicon.png', width: 100, height: 100),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title),
-              Text(clienteNombre),
-              Text(clienteCorreo),
-              ...productos.map((producto) => Text(producto.title)),
-              Text(total.toString()),
-            ],
-          ),
-        ),
-      ],
+class ProductoCarrito {
+  const ProductoCarrito({required this.productId, required this.quantity});
+
+  final int productId;
+  final int quantity;
+
+  factory ProductoCarrito.fromJson(Map<String, dynamic> json) =>
+      ProductoCarrito(
+        productId: json['productId'] as int,
+        quantity: json['quantity'] as int,
+      );
+}
+
+class Usuario {
+  const Usuario({required this.nombre, required this.correo});
+
+  final String nombre;
+  final String correo;
+
+  factory Usuario.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as Map<String, dynamic>;
+    return Usuario(
+      nombre: '${name['firstname']} ${name['lastname']}',
+      correo: json['email'] as String,
     );
   }
+}
+
+class DetalleCarrito {
+  const DetalleCarrito({
+    required this.carrito,
+    required this.usuario,
+    required this.productos,
+  });
+
+  final Carrito carrito;
+  final Usuario usuario;
+  final List<Producto> productos;
 }
