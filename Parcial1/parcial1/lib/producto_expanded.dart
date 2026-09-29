@@ -13,6 +13,55 @@ class ProductoExpanded extends StatelessWidget {
   final int productoId;
   final VoidCallback onDelete;
 
+  Future<void> _agregar(BuildContext context) async {
+    try {
+      await Api.agregarAlCarrito(productoId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Producto agregado')));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo agregar el producto')),
+        );
+      }
+    }
+  }
+
+  Future<void> _eliminar(BuildContext context) async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar producto'),
+        content: const Text('¿Deseas eliminar este producto?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmado != true) return;
+    try {
+      await Api.eliminarProducto(productoId);
+      if (!context.mounted) return;
+      onDelete();
+      Navigator.pop(context);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo eliminar el producto')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,12 +110,7 @@ class ProductoExpanded extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () => ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                              const SnackBar(
-                                content: Text('Producto agregado'),
-                              ),
-                            ),
+                        onPressed: () => _agregar(context),
                         icon: const Icon(Icons.add_shopping_cart),
                         label: const Text('Agregar'),
                       ),
@@ -74,10 +118,7 @@ class ProductoExpanded extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          onDelete();
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => _eliminar(context),
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Eliminar'),
                       ),

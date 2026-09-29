@@ -31,6 +31,28 @@ class Api {
   static Future<Producto> producto(int id) async =>
       Producto.fromJson(await _get('/products/$id') as Map<String, dynamic>);
 
+  static Future<void> agregarAlCarrito(int productId) async {
+    final response = await http.post(
+      Uri.parse('$_store/carts'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': 1,
+        'date': DateTime.now().toIso8601String().split('T').first,
+        'products': [
+          {'productId': productId, 'quantity': 1},
+        ],
+      }),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Add failed');
+    }
+  }
+
+  static Future<void> eliminarProducto(int id) async {
+    final response = await http.delete(Uri.parse('$_store/products/$id'));
+    if (response.statusCode != 200) throw Exception('Delete failed');
+  }
+
   static Future<List<Carrito>> carritos() async =>
       ((await _get('/carts')) as List)
           .map((json) => Carrito.fromJson(json as Map<String, dynamic>))
